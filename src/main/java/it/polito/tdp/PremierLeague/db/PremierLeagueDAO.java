@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import it.polito.tdp.PremierLeague.model.Action;
@@ -12,6 +13,56 @@ import it.polito.tdp.PremierLeague.model.Player;
 import it.polito.tdp.PremierLeague.model.Team;
 
 public class PremierLeagueDAO {
+	
+	public List<Match> matchesTeamHome(Team t) {	 // punti in casa
+		String sql = "SELECT * "
+				+ "FROM matches "
+				+ "WHERE matches.TeamHomeID = ?";
+		List<Match> result = new ArrayList<Match>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, t.getTeamID());
+			ResultSet res = st.executeQuery();
+			
+			while (res.next()) {
+				Match match = new Match(res.getInt("MatchID"), res.getInt("TeamHomeID"), res.getInt("TeamAwayID"), res.getInt("TeamHomeFormation"), 
+						res.getInt("TeamAwayFormation"),res.getInt("ResultOfTeamHome"), res.getTimestamp("Date").toLocalDateTime());
+				result.add(match);
+			}
+			
+			conn.close();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public List<Match> matchesTeamAway(Team t) {	// punti in trasferta
+		String sql = "SELECT * "
+				+ "FROM matches "
+				+ "WHERE matches.TeamAwayID = ?";
+		List<Match> result = new ArrayList<Match>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, t.getTeamID());
+			ResultSet res = st.executeQuery();
+			
+			while (res.next()) {
+				Match match = new Match(res.getInt("MatchID"), res.getInt("TeamHomeID"), res.getInt("TeamAwayID"), res.getInt("TeamHomeFormation"), 
+						res.getInt("TeamAwayFormation"),res.getInt("ResultOfTeamHome"), res.getTimestamp("Date").toLocalDateTime());
+				result.add(match);
+			}
+			
+			conn.close();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	public List<Player> listAllPlayers(){
 		String sql = "SELECT * FROM Players";
