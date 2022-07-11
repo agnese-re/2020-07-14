@@ -13,6 +13,33 @@ import it.polito.tdp.PremierLeague.model.Team;
 
 public class PremierLeagueDAO {
 	
+	public List<Match> getAllMatchesTeam(Team team) {
+		String sql = "SELECT matches.*, t1.Name AS nome1, t2.Name AS nome2 "
+				+ "FROM matches, teams t1, teams t2 "
+				+ "WHERE matches.TeamHomeID = t1.TeamID "
+				+ "	AND matches.TeamAwayID = t2.TeamID "
+				+ "	AND (matches.TeamHomeID = ? "
+				+ "	OR matches.TeamAwayID = ?)";
+		List<Match> result = new ArrayList<Match>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, team.getTeamID());		// partite in casa
+			st.setInt(2, team.getTeamID());		// partite in trasferta
+			ResultSet res = st.executeQuery();
+			
+			while (res.next())
+				result.add(new Match(res.getInt("MatchID"), res.getInt("TeamHomeID"), res.getInt("TeamAwayID"), 
+								res.getInt("TeamHomeFormation"), res.getInt("TeamAwayFormation"),res.getInt("ResultOfTeamHome"),
+									res.getTimestamp("Date").toLocalDateTime(), res.getString("nome1"), res.getString("nome2")));
+			conn.close();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public List<Player> listAllPlayers(){
 		String sql = "SELECT * FROM Players";
 		List<Player> result = new ArrayList<Player>();
@@ -98,7 +125,6 @@ public class PremierLeagueDAO {
 				
 				Match match = new Match(res.getInt("m.MatchID"), res.getInt("m.TeamHomeID"), res.getInt("m.TeamAwayID"), res.getInt("m.teamHomeFormation"), 
 							res.getInt("m.teamAwayFormation"),res.getInt("m.resultOfTeamHome"), res.getTimestamp("m.date").toLocalDateTime(), res.getString("t1.Name"),res.getString("t2.Name"));
-				
 				
 				result.add(match);
 
